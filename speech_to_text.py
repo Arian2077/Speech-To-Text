@@ -1,5 +1,8 @@
 # you have to install speech_recognition,pyaudio and pyttsx3
 import speech_recognition as spr
+# import platform
+# to get user OS ('Linux', 'Darwin', 'Java', 'Windows'):
+# MY_OS = platform.system()
 
 # with using lock , Im going to force user to select a file
 lock = False
@@ -65,7 +68,11 @@ the recognizer had some problems with persian language
 
 def output_text(text):
     global file_name, drive
-    f = open(drive+file_name+".txt", "a", encoding="utf-8")
+
+    # (value_when_true) if (condition) else (value_when_false)
+    path = ("" if drive == "" else drive + ":/") + file_name + ".txt"
+
+    f = open(path, "a", encoding="utf-8")
     f.write(text)
     f.write("\n")
     f.close()
@@ -78,8 +85,13 @@ def loading_file():
     global file_name, drive, lock
     try:
         file_name = input("Enter your file name: ")
-        drive = input("Enter the drive that you saved your file in: ")+":/"
-        with open(drive+file_name+".txt", "r")as f:
+        drive = input("Enter the drive that you saved your file in: ")
+        
+        file_name = "new file" if file_name == "" else file_name
+
+        path = ("" if drive == "" else drive + ":/") + file_name + ".txt"
+        
+        with open(path, "r")as f:
             f.read()
             print("file found succsesfully\n")
             f.close()
@@ -94,22 +106,17 @@ def making_file():
     while True:
         file = input("What do you want to name your file? ")
         drive = input("Which drive you want to save your file? ")
-        if file == "":
-            file = "new file"
 
-        if drive == "":
-            with open(file+".txt", "w")as f:
-                f.write("")
-                print("making file went succesfully\n")
-                f.close()
-                lock = False
-        else:
-            with open(drive+":/"+file+".txt", "w")as f:
-                f.write("")
-                print("making file went succesfully\n")
-                f.close()
-                lock = False
-                return
+        file = "new file" if file == "" else file
+
+        path = ("" if drive == "" else drive + ":/") + file + ".txt"
+        
+        with open(path, "w")as f:
+            f.write("")
+            print("making file went succesfully\n")
+            f.close()
+            lock = False
+            return
             
 ########################### Language Selection ####################
 
@@ -118,36 +125,48 @@ def language():
     global my_language
     print("1.Persian\n"+"2.English")
     choice = input("Select you're language(use numbers): ")
-    if choice == "1":
-        my_language = "fa-IR"
-        print("Now you can record your voice using Persian language\n")
-        return
-    elif choice == "2":
-        my_language = "en-US"
-        print("Now you can record your voice using English language\n")
-        return
-    else:
-        print("returning to menu...\n")
-        
+    
+    match choice:
+        case "1":
+            my_language = "fa-IR"
+            print("Now you can record your voice using Persian language\n")
+            return
+        case "2":
+            my_language = "en-US"
+            print("Now you can record your voice using English language\n")
+            return
+        case _:
+            print("returning to menu...\n")
+
 ########################### Menu #########################
 
 
 print("___\___\___\___\______Speech To Text______/___/___/___/_____")
 
 while True:
-    print("1.start\n"+"2.Enter new file\n" +
-          "3.making new file\n"+"4.Language\n"+"5.exit")
-    plan = input("what is your plan(use numbers)? ")
-    if plan == "1":
-        speech_To_Text()
-    elif plan == "2":
-        loading_file()
-    elif plan == "3":
-        making_file()
-    elif plan == "4":
-        language()
-    elif plan == "5":
-        print("goodbye")
-        break
-    else:
-        "Please enter one of the numbers on the menu!!!!"
+    #  ( \r ) makes the cursor jump to the first column(begin of the line)
+    myMenu = """
+        \r1.start
+        \r2.Enter new file
+        \r3.making new file
+        \r4.Language
+        \r5.exit
+        \r"""
+
+    plan = input(myMenu+"what is your plan(use numbers)? ")
+
+    match plan:
+        case "1":
+            speech_To_Text()
+        case "2":
+            loading_file()
+        case "3":
+            making_file()
+        case "4":
+            language()
+        case "5":
+            print("goodbye")
+            break
+        case _:
+            # action-default
+            print("Please enter one of the numbers on the menu!!!!")
